@@ -67,6 +67,93 @@ module Origami
             Signature.verify(subfilter.to_s, data, signature, store, chain)
         end
 
+        def add_external_signature(method: Signature::CADES_DETACHED,
+                                   required_size: nil,
+                                   annotation: nil,
+                                   issuer: nil,
+                                   location: nil,
+                                   contact: nil,
+                                   reason: nil,
+                                   &block)
+
+            unless annotation.nil? or annotation.is_a?(Annotation::Widget::Signature)
+                raise TypeError, "Expected a Annotation::Widget::Signature object."
+            end
+
+            #
+            # XXX: Currently signing a linearized document will result in a broken document.
+            # Delinearize the document first until we find a proper way to handle this case.
+            #
+            if self.linearized?
+                self.delinearize!
+            end
+
+            digsig = Signature::DigitalSignature.new.set_indirect(true)
+
+            if annotation.nil?
+                annotation = Annotation::Widget::Signature.new
+                annotation.Rect = Rectangle[:llx => 0.0, :lly => 0.0, :urx => 0.0, :ury => 0.0]
+            end
+
+            annotation.V = digsig
+            add_fields(annotation)
+            self.Catalog.AcroForm.SigFlags =
+              InteractiveForm::SigFlags::SIGNATURES_EXIST | InteractiveForm::SigFlags::APPEND_ONLY
+
+            digsig.Type = :Sig
+            digsig.Contents = HexaString.new("\x00" * required_size)
+            digsig.Filter = :"Adobe.PPKLite"
+            digsig.SubFilter = Name.new(method)
+            digsig.ByteRange = [0, 0, 0, 0]
+            digsig.Name = issuer
+
+            digsig.Location = HexaString.new(location) if location
+            digsig.ContactInfo = HexaString.new(contact) if contact
+            digsig.Reason = HexaString.new(reason) if reason
+
+            #
+            #  Flattening the PDF to get file view.
+            #
+            compile
+
+            #
+            # Creating an empty Xref table to compute signature byte range.
+            #
+            rebuild_dummy_xrefs
+
+            sig_offset = get_object_offset(digsig.no, digsig.generation) + digsig.signature_offset
+
+            digsig.ByteRange[0] = 0
+            digsig.ByteRange[1] = sig_offset
+            digsig.ByteRange[2] = sig_offset + digsig.Contents.to_s.bytesize
+
+            until digsig.ByteRange[3] == filesize - digsig.ByteRange[2]
+                digsig.ByteRange[3] = filesize - digsig.ByteRange[2]
+            end
+
+            # From that point on, the file size remains constant
+
+            #
+            # Correct Xrefs variations caused by ByteRange modifications.
+            #
+            rebuild_xrefs
+
+            file_data = output()
+            signable_data = file_data[digsig.ByteRange[0],digsig.ByteRange[1]] +
+              file_data[digsig.ByteRange[2],digsig.ByteRange[3]]
+
+            #
+            # Computes and inserts the signature.
+            #
+            signature = yield signable_data
+            digsig.Contents[0, signature.size] = signature
+
+            #
+            # No more modification are allowed after signing.
+            #
+            self.freeze
+        end
+
         #
         # Sign the document with the given key and x509 certificate.
         # _certificate_:: The X509 certificate containing the public key.
@@ -348,6 +435,7 @@ module Origami
         PKCS1_RSA_SHA1  = "adbe.x509.rsa_sha1"
         PKCS7_SHA1      = "adbe.pkcs7.sha1"
         PKCS7_DETACHED  = "adbe.pkcs7.detached"
+        CADES_DETACHED  = "ETSI.CAdES.detached"
 
         #
         # PKCS1 class used for adbe.x509.rsa_sha1.
