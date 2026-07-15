@@ -482,7 +482,7 @@ module Origami
         end
 
         def clear
-            self.data = ''
+            self.data = String.new
             @xrefs = []
             self.Index = []
         end
@@ -532,7 +532,7 @@ module Origami
         end
 
         def save! #:nodoc:
-            self.data = ""
+            self.data = String.new
 
             type_w, field1_w, field2_w = self.W
             @xrefs.each do |xref| @data << xref.to_xrefstm_data(type_w, field1_w, field2_w) end

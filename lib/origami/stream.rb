@@ -334,7 +334,7 @@ module Origami
         end
 
         def to_s(indent: 1, tab: "\t", eol: $/) #:nodoc:
-            content = ""
+            content = String.new
 
             content << @dictionary.to_s(indent: indent, tab: tab)
             content << "stream" + eol
@@ -494,8 +494,8 @@ module Origami
         def pre_build #:nodoc:
             load!
 
-            prolog = ""
-            data = ""
+            prolog = String.new
+            data = String.new
             objoff = 0
             @objects.to_a.sort.each do |num,obj|
 

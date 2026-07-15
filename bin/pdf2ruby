@@ -90,7 +90,7 @@ TARGET_FILE = File.join(TARGET_DIR, "#{TARGET_DIR}.rb")
 STREAM_DIR = "streams"
 
 def objectToRuby(obj, inclevel = 0, internalname = nil, do_convert = false)
-    code = ""
+    code = String.new
 
     code <<
         case obj
@@ -199,7 +199,7 @@ end
 
 def dictionaryToHashMap(dict, inclevel, internalname)
     i = 0
-    code = "\n"
+    code = String.new("\n")
     dict.each_pair do |key, val|
         rubyname = literalToRuby(key)
         subintname = "#{internalname}[#{rubyname}]"
@@ -228,7 +228,7 @@ end
 def streamToRuby(stm, internalname)
     dict = stm.dictionary.dup.delete_if {|k, _| k == :Length}
 
-    code = "Stream.new("
+    code = String.new("Stream.new(")
 
     if @options[:xstreams]
         stmdir = File.join(TARGET_DIR, STREAM_DIR)

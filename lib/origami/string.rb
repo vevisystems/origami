@@ -255,7 +255,7 @@ module Origami
                 raise InvalidLiteralStringObjectError, "No literal string start token found"
             end
 
-            result = ""
+            result = String.new
             depth = 0
             while depth != 0 or scanner.peek(1) != TOKENS.last do
                 raise InvalidLiteralStringObjectError, "Non-terminated string" if scanner.eos?

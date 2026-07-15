@@ -808,7 +808,7 @@ module Origami
                         end
 
                     raise InvalidColorError, "Invalid base color space" unless cs_base
-                    palette = ""
+                    palette = String.new
 
                     case cs_base
                     when Color::Space::DEVICE_GRAY
