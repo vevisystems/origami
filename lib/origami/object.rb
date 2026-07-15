@@ -689,7 +689,7 @@ module Origami
         # _data_:: The object data.
         #
         def to_s(data, eol: $/)
-            content = String.new
+            content = ::String.new
             content << "#{no} #{generation} #{TOKENS.first}" << eol if indirect? and numbered?
             content << data
             content << eol << TOKENS.last << eol if indirect? and numbered?

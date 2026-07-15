@@ -143,7 +143,7 @@ module Origami
             # Each line should be prepended by a byte identifying a PNG predictor.
             #
             def png_post_prediction(data, bpp, bpr)
-                result = String.new
+                result = ::String.new
                 uprow = "\0" * bpr
                 thisrow = "\0" * bpr
                 nrows = (data.size + bpr - 1) / bpr

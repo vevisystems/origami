@@ -77,7 +77,7 @@ module Origami
             desc.add REXML::Element.new('pdfaid:part').add_text('1')
             doc.elements["*/rdf:RDF"].add desc
 
-            xml = String.new; doc.write(xml, 3)
+            xml = ::String.new; doc.write(xml, 3)
             metadata.data = xml
         end
     end
