@@ -335,7 +335,7 @@ module Origami
             # Outputs self into PDF code.
             #
             def to_s(eol: $/)
-                "xref" << eol << @subsections.map{|sub| sub.to_s(eol: eol)}.join
+                +"xref" << eol << @subsections.map{|sub| sub.to_s(eol: eol)}.join
             end
         end
     end

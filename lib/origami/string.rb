@@ -110,7 +110,7 @@ module Origami
         attr_accessor :encoding
 
         def initialize(str) #:nodoc:
-            super(str.force_encoding('binary'))
+            super(str.dup.force_encoding('binary'))
 
             detect_encoding
         end

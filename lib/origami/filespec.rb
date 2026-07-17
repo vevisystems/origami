@@ -106,10 +106,10 @@ module Origami
                 # Absolute vs relative path
                 if file.include? ":"
                     path << "/"
-                    file.sub!(":","")
+                    file = file.sub(":","")
                 end
 
-                file.tr!("\\", "/")
+                file = file.tr("\\", "/")
                 LiteralString.new(path + file)
             end
         end
